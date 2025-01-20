@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* Resetting default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f7f7f7;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding-top: 60px; /* Space for the header */
+        }
+
+        /* Header Styling */
+        header {
+            width: 100%;
+            background-color: #1E90FF;
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        header a {
+            text-decoration: none;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 30px;
+            transition: background 0.3s ease, transform 0.3s ease;
+            margin-left: 15px;
+        }
+
+        header a:hover {
+            background: #00BFFF;
+            transform: translateY(-5px);
+        }
+
+        header a:active {
+            transform: translateY(2px);
+        }
+
+        /* Main content container */
+        .content-wrapper {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            height: 100%;
+
+        }
+
+        .content {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            text-align: center; /* Centering the content */
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        .poll-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .poll-item {
+            background: #f2f6fc;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+            text-align: center;
+        }
+
+        .poll-item:hover {
+            background: #e1e9f3;
+        }
+
+        .poll-item a {
+            font-size: 1.2rem;
+            color: #1E90FF;
+            text-decoration: none;
+            display: block;
+            transition: color 0.3s ease;
+        }
+
+        .poll-item a:hover {
+            color: #00BFFF;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 80px; /* Adjust padding for smaller screens */
+            }
+
+            h2 {
+                font-size: 1.6rem;
+            }
+
+            header a {
+                font-size: 0.9rem;
+                padding: 8px 16px;
+            }
+
+            .poll-item {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>Pollcraft Dashboard</div>
+        <div style="margin-left:auto;">
+            <a href="/create_poll">Create Poll</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="content">
+            <h2>Your Polls</h2>
+            <ul class="poll-list">
+                {% for poll in polls %}
+                <li class="poll-item">
+                    <a href="/poll/{{ poll.id }}">{{ poll.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+</body>
+</html>

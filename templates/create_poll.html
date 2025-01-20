@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Poll</title>
+    <style>
+        /* Resetting default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f7f7f7;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding-top: 60px; /* Space for the header */
+        }
+
+        /* Header Styling */
+        header {
+            width: 100%;
+            background-color: #1E90FF;
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        header a {
+            text-decoration: none;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 30px;
+            transition: background 0.3s ease, transform 0.3s ease;
+            margin-left: 15px;
+        }
+
+        header a:hover {
+            background: #00BFFF;
+            transform: translateY(-5px);
+        }
+
+        header a:active {
+            transform: translateY(2px);
+        }
+
+        /* Main content container */
+        .content-wrapper {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            height: 100%;
+            padding-top: 100px; /* Adjust for header height */
+        }
+
+        .content {
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center; /* Centering the content */
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #1E90FF;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00BFFF;
+            transform: translateY(-5px);
+        }
+
+        button:active {
+            transform: translateY(2px);
+        }
+
+        #options {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .option-input {
+            margin-bottom: 10px;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 80px; /* Adjust padding for smaller screens */
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            input[type="text"], button {
+                font-size: 0.9rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>Create a New Poll</div>
+        <div style="margin-left:auto;">
+            <a href="/logout">Logout</a>
+        </div>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="content">
+            <h1>Create Poll</h1>
+            <form method="POST">
+                <input type="text" name="title" placeholder="Poll Title" required><br>
+                <div id="options">
+                    <input type="text" class="option-input" name="options" placeholder="Option 1" required><br>
+                </div>
+                <button type="button" onclick="addOption()">Add another option</button><br>
+                <button type="submit">Create Poll</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function addOption() {
+            const optionsDiv = document.getElementById('options');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'options';
+            input.classList.add('option-input');
+            input.placeholder = 'Another option';
+            optionsDiv.appendChild(input);
+            optionsDiv.appendChild(document.createElement('br'));
+        }
+    </script>
+
+</body>
+</html>

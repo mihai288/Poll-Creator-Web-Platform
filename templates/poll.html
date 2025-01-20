@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ poll.title }}</title>
+    <style>
+        /* Resetting default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f7f7f7;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding-top: 60px; /* Space for the header */
+        }
+
+        /* Header Styling */
+        header {
+            width: 100%;
+            background-color: #1E90FF;
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        header a {
+            text-decoration: none;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 30px;
+            transition: background 0.3s ease, transform 0.3s ease;
+            margin-left: 15px;
+        }
+
+        header a:hover {
+            background: #00BFFF;
+            transform: translateY(-5px);
+        }
+
+        header a:active {
+            transform: translateY(2px);
+        }
+
+        /* Main content container */
+        .content-wrapper {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            height: 100%;
+            padding-top: 100px; /* Adjust for header height */
+        }
+
+        .content {
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center; /* Centering the content */
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin: 20px 0;
+            color: #555;
+        }
+
+        a {
+            color: #1E90FF;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            color: #00BFFF;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        .poll-option {
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #1E90FF;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00BFFF;
+            transform: translateY(-5px);
+        }
+
+        button:active {
+            transform: translateY(2px);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 80px; /* Adjust padding for smaller screens */
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            input[type="radio"], button {
+                font-size: 0.9rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>{{ poll.title }}</div>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="content">
+            {% if is_creator %}
+                <a href="/poll/{{ poll.id }}/results">View Results</a>
+            {% else %}
+                {% if 'username' not in session %}
+                    <p>Please <a href="{{ url_for('login') }}">log in</a> to vote.</p>
+                {% else %}
+                    {% if has_voted %}
+                        <p>You have succesfully voted for this poll! You can close the page now!</p>
+                    {% else %}
+                        <form method="POST">
+                            {% for option in poll.options %}
+                                <div class="poll-option">
+                                    <input type="radio" name="option" value="{{ option.id }}" required>{{ option.text }}
+                                </div>
+                            {% endfor %}
+                            <button type="submit">Vote</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </div><br>
+        <div class="content">
+                    <a href="/dashboard">Delete</a>
+        </div>
+    </div>
+
+</body>
+</html>
