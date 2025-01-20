@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
+import re
 
 app = Flask(__name__)
 app.secret_key = 'secret'
@@ -16,8 +17,10 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)  # Added email field
     password = db.Column(db.String(200), nullable=False)
     polls = db.relationship('Poll', backref='creator', lazy=True)
+
 
 
 class Poll(db.Model):
@@ -53,25 +56,42 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    errors = []  # Initialize an empty list to store error messages
+
     if request.method == 'POST':
+        email = request.form['email']
         username = request.form['username']
         password = request.form['password']
 
+        # Check if email already exists
+        if User.query.filter_by(email=email).first():
+            errors.append("Email already used!")
+
+        # Check if username already exists
         if User.query.filter_by(username=username).first():
-            return "Username already exists!"
+            errors.append("Username already exists!")
 
-        hashed_password = generate_password_hash(password)
-        new_user = User(username=username, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect(url_for('login'))
+        # Validate password (at least one uppercase and one digit)
+        if len(password) < 8 or not re.search(r'[A-Z]', password) or not re.search(r'\d', password):
+            errors.append(
+                "Password must be at least 8 characters long, contain at least one uppercase letter, and one digit!")
 
-    return render_template('register.html')
+        # If there are no errors, create the new user
+        if not errors:
+            hashed_password = generate_password_hash(password)
+            new_user = User(email=email, username=username, password=hashed_password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('login'))
+
+    # Render the form with errors if any
+    return render_template('register.html', errors=errors)
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -134,6 +154,7 @@ def create_poll():
 
 @app.route('/poll/<poll_id>', methods=['GET', 'POST'])
 def poll(poll_id):
+    print("Debugging: Entering poll function")
     poll = Poll.query.get(poll_id)
     if not poll:
         return "Poll not found!"
@@ -165,7 +186,7 @@ def poll(poll_id):
                 db.session.commit()
 
         return redirect(url_for('poll', poll_id=poll_id))
-
+    print(f"Debugging: Options for poll {poll.id}: {[option.text for option in poll.options]}")
     return render_template('poll.html', poll=poll, is_creator=is_creator, has_voted=has_voted)
 
 @app.route('/delete/<poll_id>', methods=['GET'])

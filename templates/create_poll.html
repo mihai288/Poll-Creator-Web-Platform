@@ -39,24 +39,55 @@
             color: white;
             text-transform: uppercase;
         }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-right: 20px;
+        }
 
-        header a {
-            text-decoration: none;
-            color: #fff;
+        .dropdown-button {
+            cursor: pointer;
             padding: 10px 20px;
             font-size: 1rem;
             border-radius: 30px;
-            transition: background 0.3s ease, transform 0.3s ease;
-            margin-left: 15px;
+             transition: background 0.3s ease, transform 0.3s ease;
+             text-decoration: none;
+            color: #fff;
         }
 
-        header a:hover {
+         .dropdown-button:hover {
             background: #00BFFF;
             transform: translateY(-5px);
         }
 
-        header a:active {
+        .dropdown-button:active {
             transform: translateY(2px);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            right: 0; /* Align dropdown to the right */
+            border-radius: 8px;
+
+        }
+
+        .dropdown-content a {
+            font-size: 15px;
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {background-color: #f1f1f1;border-radius: 10px}
+
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
 
         /* Main content container */
@@ -123,6 +154,19 @@
             margin-bottom: 10px;
         }
 
+       .heading-input-container {
+           margin-bottom: 10px;
+        }
+
+        .heading-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            display: none;
+         }
         /* Responsive styles */
         @media (max-width: 768px) {
             body {
@@ -132,7 +176,10 @@
             h1 {
                 font-size: 1.6rem;
             }
-
+            .dropdown-button {
+                font-size: 0.9rem;
+                padding: 8px 16px;
+            }
             input[type="text"], button {
                 font-size: 0.9rem;
             }
@@ -146,21 +193,27 @@
 <body>
 
     <header>
-        <div>Create a New Poll</div>
-        <div style="margin-left:auto;">
-            <a href="/logout">Logout</a>
+        <div class="logo">Create a new Poll</div>
+        <div class="dropdown">
+            <div class="dropdown-button">{{ session.username }}</div>
+            <div class="dropdown-content">
+                 <a href="/dashboard">View Polls</a>
+                <a href="/create_poll">Create Poll</a>
+                <a href="/logout">Log out</a>
+            </div>
         </div>
     </header>
 
     <div class="content-wrapper">
         <div class="content">
             <h1>Create Poll</h1>
-            <form method="POST">
+            <form method="POST" autocomplete="off">
                 <input type="text" name="title" placeholder="Poll Title" required><br>
                 <div id="options">
-                    <input type="text" class="option-input" name="options" placeholder="Option 1" required><br>
+
                 </div>
-                <button type="button" onclick="addOption()">Add another option</button><br>
+                 <button type="button" onclick="addHeading()">Add Question</button><br>
+                 <button type="button" onclick="addOption()">Add Option</button><br>
                 <button type="submit">Create Poll</button>
             </form>
         </div>
@@ -173,9 +226,56 @@
             input.type = 'text';
             input.name = 'options';
             input.classList.add('option-input');
-            input.placeholder = 'Another option';
+            input.placeholder = 'Option';
             optionsDiv.appendChild(input);
             optionsDiv.appendChild(document.createElement('br'));
+        }
+
+         function addHeading() {
+                const optionsDiv = document.getElementById('options');
+
+                // Create the container div for heading input
+                const headingContainer = document.createElement('div');
+                headingContainer.classList.add('heading-input-container');
+
+                // Create input element for the heading (text input)
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.classList.add('heading-input');
+                input.placeholder = 'Question';
+
+                // Create hidden input (hidden) for sending html
+                 const hiddenInput = document.createElement('input');
+                 hiddenInput.type = 'hidden';
+                 hiddenInput.name = 'options';
+
+
+                headingContainer.appendChild(input);
+                headingContainer.appendChild(hiddenInput);
+
+                // Add event listener for when the input element loses focus to create the h1 tag and hidden input
+                input.addEventListener('blur', function() {
+                   if (this.value) {
+                        const headingText = this.value;
+
+                         const headingElement = document.createElement('h1');
+                         headingElement.textContent = headingText;
+
+                         hiddenInput.value = '<h1>' + headingText + '</h1>';
+
+                         // Replace text input with h1 tag
+                         headingContainer.replaceChild(headingElement, input);
+
+                    }else
+                    {
+                        headingContainer.remove();
+                    }
+
+                });
+
+                optionsDiv.appendChild(headingContainer);
+                input.style.display = "block";
+                input.focus();
         }
     </script>
 

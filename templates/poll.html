@@ -168,11 +168,15 @@
                         <p>You have succesfully voted for this poll! You can close the page now!</p>
                     {% else %}
                         <form method="POST">
-                            {% for option in poll.options %}
-                                <div class="poll-option">
-                                    <input type="checkbox" name="options[]" value="{{ option.id }}">{{ option.text }}
-                                </div>
-                            {% endfor %}
+                             {% for option in poll.options %}
+                                {% if (option.text|safe)[:4] == '<h1>' %}
+                                    {{ option.text|safe }}
+                                {% else %}
+                                    <div class="poll-option">
+                                        <input type="checkbox" name="options[]" value="{{ option.id }}">{{ option.text }}
+                                    </div>
+                                {% endif %}
+                             {% endfor %}
                             <button type="submit">Vote</button>
                         </form>
 
