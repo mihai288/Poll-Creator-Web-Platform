@@ -151,19 +151,53 @@ def poll(poll_id):
 
     if request.method == 'POST':
         if not is_creator and not has_voted:
-            selected_option_id = request.form['option']
-            option = Option.query.get(selected_option_id)
-            if option:
-                option.votes += 1
-                db.session.commit()
+            selected_option_ids = request.form.getlist('options[]')  # Get list of selected options
+            if selected_option_ids:
+                # Loop through all selected options and process the vote
+                for selected_option_id in selected_option_ids:
+                    option = Option.query.get(selected_option_id)
+                    if option:
+                        option.votes += 1
+                        db.session.commit()
 
-                new_vote = Vote(user_id=user.id, poll_id=poll.id, option_id=selected_option_id)  # salvăm option_id
-                db.session.add(new_vote)
+                        new_vote = Vote(user_id=user.id, poll_id=poll.id, option_id=selected_option_id)  # Save each vote
+                        db.session.add(new_vote)
                 db.session.commit()
 
         return redirect(url_for('poll', poll_id=poll_id))
 
     return render_template('poll.html', poll=poll, is_creator=is_creator, has_voted=has_voted)
+
+@app.route('/delete/<poll_id>', methods=['GET'])
+def delete_poll(poll_id):
+    # Check if the user is logged in
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    user = User.query.filter_by(username=session['username']).first()
+    if not user:
+        return redirect(url_for('login'))
+
+    # Get the poll to delete
+    poll = Poll.query.get(poll_id)
+    if not poll:
+        return "Poll not found!"
+
+    # Ensure the logged-in user is the creator of the poll
+    if poll.creator_id != user.id:
+        return "You are not the creator of this poll!"
+
+    # Delete related votes
+    Vote.query.filter_by(poll_id=poll_id).delete()
+
+    # Delete options associated with the poll
+    Option.query.filter_by(poll_id=poll_id).delete()
+
+    # Delete the poll itself
+    db.session.delete(poll)
+    db.session.commit()
+
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/poll/<poll_id>/results')
@@ -179,18 +213,24 @@ def poll_results(poll_id):
     if not user or poll.creator_id != user.id:
         return "Access denied!"
 
+    # Get all votes for the poll
     votes = Vote.query.filter_by(poll_id=poll.id).all()
 
-    vote_details = []
+    # Group votes by username
+    vote_details = {}
     for vote in votes:
         user = User.query.get(vote.user_id)
         option = Option.query.get(vote.option_id)
-        vote_details.append({
-            'username': user.username,
-            'option_text': option.text
-        })
 
-    return render_template('results.html', poll=poll, vote_details=vote_details)
+        if user.username not in vote_details:
+            vote_details[user.username] = []
+
+        vote_details[user.username].append(option.text)
+
+    # Convert the vote_details dictionary into a list of dictionaries for easier rendering
+    grouped_votes = [{'username': username, 'options': options} for username, options in vote_details.items()]
+
+    return render_template('results.html', poll=poll, grouped_votes=grouped_votes)
 
 
 

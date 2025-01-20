@@ -146,12 +146,14 @@
 
             <h2>Vote Details</h2>
             <ul>
-                {% for vote in vote_details %}
+                {% for vote in grouped_votes %}
                     <li>
-                        <strong>{{ vote.username }}</strong> voted for: <em>{{ vote.option_text }}</em>
+                        <strong>{{ vote.username }}</strong> voted for:
+                        <em>{{ vote.options | join(', ') }}</em>
                     </li>
                 {% endfor %}
             </ul>
+
 
             <a href="/dashboard">Back to Home</a>
         </div>

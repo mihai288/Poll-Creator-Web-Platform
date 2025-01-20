@@ -170,18 +170,22 @@
                         <form method="POST">
                             {% for option in poll.options %}
                                 <div class="poll-option">
-                                    <input type="radio" name="option" value="{{ option.id }}" required>{{ option.text }}
+                                    <input type="checkbox" name="options[]" value="{{ option.id }}">{{ option.text }}
                                 </div>
                             {% endfor %}
                             <button type="submit">Vote</button>
                         </form>
+
                     {% endif %}
                 {% endif %}
             {% endif %}
         </div><br>
+        {% if is_creator %}
         <div class="content">
-                    <a href="/dashboard">Delete</a>
+            <a href="/delete/{{ poll.id }}">Delete</a>
         </div>
+
+        {% endif %}
     </div>
 
 </body>
