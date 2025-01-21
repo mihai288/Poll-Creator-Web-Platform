@@ -33,13 +33,15 @@
             z-index: 100;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             font-size: 1.5rem;
             color: white;
             text-transform: uppercase;
         }
-
+        header .logo {
+            margin-left: 20px;
+        }
         .dropdown {
             position: relative;
             display: inline-block;
@@ -227,8 +229,8 @@
             <ul>
                 {% for vote in grouped_votes %}
                     <li>
-                        <strong>{{ vote.username }}</strong> voted for:
-                        <em>{{ vote.options | join(', ') }}</em>
+                        <strong>{{ vote.username }}</strong> voted:
+                        <b>{{ vote.options | join(', ') }}</b>
                     </li>
                 {% endfor %}
             </ul>

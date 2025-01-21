@@ -137,8 +137,7 @@
         }
 
         button:hover {
-            background-color: #00BFFF;
-            transform: translateY(-5px);
+            background-color: #006905;
         }
 
         button:active {
@@ -167,6 +166,12 @@
             font-size: 1rem;
             display: none;
          }
+        .control{
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
         /* Responsive styles */
         @media (max-width: 768px) {
             body {
@@ -212,9 +217,11 @@
                 <div id="options">
 
                 </div>
-                 <button type="button" onclick="addHeading()">Add Question</button><br>
-                 <button type="button" onclick="addOption()">Add Option</button><br>
-                <button type="submit">Create Poll</button>
+                <div class="control">
+                    <button class="q-btn" style="background-color: #ea2f2f; cursor:pointer; width: 30%;" type="button" onclick="addHeading()">Add Question</button><br>
+                    <button class="a-btn" style="background-color: #38a838; cursor:pointer; width: 30%;" type="button" onclick="addOption()">Add Answer</button><br>
+                </div>
+                    <button style="cursor:pointer; width: 90%;" type="submit";>Create this poll and get the link</button>
             </form>
         </div>
     </div>
@@ -226,7 +233,7 @@
             input.type = 'text';
             input.name = 'options';
             input.classList.add('option-input');
-            input.placeholder = 'Option';
+            input.placeholder = 'Answer';
             optionsDiv.appendChild(input);
             optionsDiv.appendChild(document.createElement('br'));
         }
