@@ -33,7 +33,7 @@
             z-index: 100;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             font-size: 1.5rem;
             color: white;
@@ -211,9 +211,8 @@
 
     <div class="content-wrapper">
         <div class="content">
-            <h1>Create Poll</h1>
             <form method="POST" autocomplete="off">
-                <input type="text" name="title" placeholder="Poll Title" required><br>
+                <input style="text-align: center; font-size: 25px;" type="text" name="title" placeholder="Poll Title" required><br>
                 <div id="options">
 
                 </div>
@@ -227,16 +226,44 @@
     </div>
 
     <script>
-        function addOption() {
+            function addOption() {
             const optionsDiv = document.getElementById('options');
+
+            const optionContainer = document.createElement('div');
+            optionContainer.style.display = 'flex';
+            optionContainer.style.alignItems = 'center';
+            optionContainer.style.marginBottom = '10px';
+
             const input = document.createElement('input');
             input.type = 'text';
             input.name = 'options';
             input.classList.add('option-input');
             input.placeholder = 'Answer';
-            optionsDiv.appendChild(input);
-            optionsDiv.appendChild(document.createElement('br'));
+
+            const correctCheckbox = document.createElement('input');
+            correctCheckbox.type = 'checkbox';
+            correctCheckbox.name = 'correct_options[]';
+            correctCheckbox.style.marginLeft = '10px';
+            correctCheckbox.value = optionsDiv.children.length; // Folosește indexul opțiunii
+
+            // Așează checkbox-ul în div-ul corespunzător
+            optionsDiv.appendChild(correctCheckbox);
+
+            // Adaugă un event listener pentru a verifica dacă checkbox-ul este selectat
+            correctCheckbox.addEventListener('change', function() {
+                if (correctCheckbox.checked) {
+                    input.style.outline = '2px solid green'; // Adaugă outline verde când este selectat
+                } else {
+                    input.style.outline = ''; // Resetează outline când este deselectat
+                }
+            });
+
+
+            optionContainer.appendChild(input);
+            optionContainer.appendChild(correctCheckbox);
+            optionsDiv.appendChild(optionContainer);
         }
+
 
          function addHeading() {
                 const optionsDiv = document.getElementById('options');

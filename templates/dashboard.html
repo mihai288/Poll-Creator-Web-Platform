@@ -130,15 +130,15 @@
 
         .poll-item {
             background: #f2f6fc;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             transition: background 0.3s ease;
             text-align: center;
-        }
-
-        .poll-item:hover {
-            background: #e1e9f3;
+             position: relative; /* Needed for absolute positioning of share button */
+            display: flex;
+            justify-content: center;
+            align-content: center;
         }
 
         .poll-item a {
@@ -147,11 +147,35 @@
             text-decoration: none;
             display: block;
             transition: color 0.3s ease;
+
         }
 
         .poll-item a:hover {
             color: #00BFFF;
         }
+         .share-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: #1E90FF;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+            border: none;
+             text-decoration: none;
+             margin-bottom: 5px;
+
+        }
+        .share-button:hover {
+            background: #00BFFF;
+        }
+         .share-button:active {
+            transform: scale(0.95);
+         }
+
         .new-poll{
             color:white;
             text-decoration: none;
@@ -183,6 +207,10 @@
             .poll-item {
                 padding: 12px;
             }
+             .share-button {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -206,13 +234,27 @@
             <ul class="poll-list">
                 {% for poll in polls %}
                 <li class="poll-item">
-                    <a href="/poll/{{ poll.id }}">{{ poll.title }}</a>
+                    <a class="poll-title" href="/poll/{{ poll.id }}"> {{ poll.title }} </a>
+                    <button class="share-button" onclick="copyToClipboard('/poll/{{ poll.id }}')">Share</button>
                 </li>
                 {% endfor %}
             </ul>
         </div>
         <a class="new-poll" href="/create_poll">+ New Poll</a>
     </div>
+
+     <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(window.location.origin + text)
+            .then(() => {
+                alert("Poll link copied to clipboard!");
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert("Failed to copy link, please try again!");
+            });
+        }
+    </script>
 
 </body>
 </html>

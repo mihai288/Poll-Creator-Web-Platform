@@ -227,13 +227,16 @@
             <br>
             <h2>Vote Details</h2>
             <ul>
-                {% for vote in grouped_votes %}
-                    <li>
-                        <strong>{{ vote.username }}</strong> voted:
-                        <b>{{ vote.options | join(', ') }}</b>
-                    </li>
-                {% endfor %}
-            </ul>
+        {% for vote in grouped_votes %}
+            <li>
+                <strong>{{ vote.username }}</strong> voted:
+                <span>{{ vote.options | join(' | ') }}</span>
+                <br>
+                <span>Total correct for <b>{{ vote.username }}</b>: {{ vote.correct_count }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+
 
             <a href="/dashboard">Back to Home</a>
         </div>

@@ -7,7 +7,6 @@ import re
 app = Flask(__name__)
 app.secret_key = 'secret'
 
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///polls.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -17,14 +16,13 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)  # Added email field
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     polls = db.relationship('Poll', backref='creator', lazy=True)
 
 
-
 class Poll(db.Model):
-    id = db.Column(db.String(36), primary_key=True)  # UUID
+    id = db.Column(db.String(36), primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     options = db.relationship('Option', backref='poll', lazy=True)
@@ -34,6 +32,7 @@ class Option(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(200), nullable=False)
     votes = db.Column(db.Integer, default=0)
+    correct = db.Column(db.Boolean, default=False)
     poll_id = db.Column(db.String(36), db.ForeignKey('poll.id'), nullable=False)
 
 
@@ -42,10 +41,11 @@ class Vote(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     poll_id = db.Column(db.String(36), db.ForeignKey('poll.id'), nullable=False)
     option_id = db.Column(db.Integer, db.ForeignKey('option.id'), nullable=False)
+    is_correct = db.Column(db.Boolean, default=False)
 
     user = db.relationship('User', backref=db.backref('votes', lazy=True))
     poll = db.relationship('Poll', backref=db.backref('votes', lazy=True))
-    option = db.relationship('Option', backref=db.backref('option_votes', lazy=True))  # schimbăm numele backref
+    option = db.relationship('Option', backref=db.backref('option_votes', lazy=True))
 
 
 with app.app_context():
@@ -53,10 +53,9 @@ with app.app_context():
     db.create_all()  # Crează noile tabele cu schema actualizată
 
 
-
 @app.route('/')
 def index():
-    return redirect(url_for('dashboard'))
+    return render_template('index.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -91,7 +90,6 @@ def register():
 
     # Render the form with errors if any
     return render_template('register.html', errors=errors)
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -136,14 +134,16 @@ def create_poll():
     if request.method == 'POST':
         title = request.form['title']
         options = request.form.getlist('options')
+        correct_options = request.form.getlist('correct_options[]')  # Contains indices of correct options
 
         user = User.query.filter_by(username=session['username']).first()
         poll_id = str(uuid.uuid4())
         new_poll = Poll(id=poll_id, title=title, creator=user)
         db.session.add(new_poll)
 
-        for option_text in options:
-            option = Option(text=option_text, poll=new_poll)
+        for i, option_text in enumerate(options):
+            is_correct = str(i) in correct_options  # Compare with the checkbox index
+            option = Option(text=option_text, poll=new_poll, correct=is_correct)
             db.session.add(option)
 
         db.session.commit()
@@ -154,7 +154,6 @@ def create_poll():
 
 @app.route('/poll/<poll_id>', methods=['GET', 'POST'])
 def poll(poll_id):
-    print("Debugging: Entering poll function")
     poll = Poll.query.get(poll_id)
     if not poll:
         return "Poll not found!"
@@ -172,22 +171,23 @@ def poll(poll_id):
 
     if request.method == 'POST':
         if not is_creator and not has_voted:
-            selected_option_ids = request.form.getlist('options[]')  # Get list of selected options
+            selected_option_ids = request.form.getlist('options[]')
             if selected_option_ids:
-                # Loop through all selected options and process the vote
                 for selected_option_id in selected_option_ids:
                     option = Option.query.get(selected_option_id)
                     if option:
                         option.votes += 1
-                        db.session.commit()
+                        is_correct = option.correct
 
-                        new_vote = Vote(user_id=user.id, poll_id=poll.id, option_id=selected_option_id)  # Save each vote
+                        new_vote = Vote(user_id=user.id, poll_id=poll.id, option_id=selected_option_id,
+                                        is_correct=is_correct)
                         db.session.add(new_vote)
                 db.session.commit()
 
         return redirect(url_for('poll', poll_id=poll_id))
     print(f"Debugging: Options for poll {poll.id}: {[option.text for option in poll.options]}")
     return render_template('poll.html', poll=poll, is_creator=is_creator, has_voted=has_voted)
+
 
 @app.route('/delete/<poll_id>', methods=['GET'])
 def delete_poll(poll_id):
@@ -237,22 +237,27 @@ def poll_results(poll_id):
     # Get all votes for the poll
     votes = Vote.query.filter_by(poll_id=poll.id).all()
 
-    # Group votes by username
+    # Group votes by username and calculate correct answers
     vote_details = {}
     for vote in votes:
         user = User.query.get(vote.user_id)
         option = Option.query.get(vote.option_id)
 
         if user.username not in vote_details:
-            vote_details[user.username] = []
+            vote_details[user.username] = {'options': [], 'correct_count': 0}
 
-        vote_details[user.username].append(option.text)
+        vote_details[user.username]['options'].append(option.text)
+
+        if vote.is_correct:
+            vote_details[user.username]['correct_count'] += 1
 
     # Convert the vote_details dictionary into a list of dictionaries for easier rendering
-    grouped_votes = [{'username': username, 'options': options} for username, options in vote_details.items()]
+    grouped_votes = [
+        {'username': username, 'options': details['options'], 'correct_count': details['correct_count']}
+        for username, details in vote_details.items()
+    ]
 
     return render_template('results.html', poll=poll, grouped_votes=grouped_votes)
-
 
 
 if __name__ == '__main__':
