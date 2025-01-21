@@ -165,7 +165,7 @@
                     <p>Please <a href="{{ url_for('login') }}">log in</a> to vote.</p>
                 {% else %}
                     {% if has_voted %}
-                        <p>You have succesfully voted for this poll! You can close the page now!</p>
+            <p>You have succesfully voted for this poll! You can get the results on <a href="/user_results">Your Answers</a> page!</p>
                     {% else %}
                         <form method="POST">
                              {% for option in poll.options %}
@@ -173,7 +173,8 @@
                                     {{ option.text|safe }}
                                 {% else %}
                                     <div class="poll-option">
-                                        <input type="checkbox" name="options[]" value="{{ option.id }}"> <span class="optiontext">{{ option.text }}</span>
+                                          <input type="checkbox" id="option_{{ option.id }}" name="options" value="{{ option.id }}">
+                                         <label for="option_{{ option.id }}">{{ option.text }}</label>
                                     </div>
                                 {% endif %}
                              {% endfor %}

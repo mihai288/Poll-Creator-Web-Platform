@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>User Results</title>
     <style>
-        /* Resetting default styles */
+           /* Resetting default styles */
         * {
             margin: 0;
             padding: 0;
@@ -62,6 +62,7 @@
 
          .dropdown-button:hover {
             background: #00BFFF;
+            transform: translateY(-5px);
         }
 
         .dropdown-button:active {
@@ -116,89 +117,30 @@
             margin-top: 20px;
         }
 
-        .poll-list {
+        .poll-results {
             list-style-type: none;
             padding: 0;
-            margin-top: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            justify-content: center;
-            width: 100%;
+            margin-top: 20px;
+             display: flex;
+              flex-direction: column;
+              gap: 10px;
         }
-
-        .poll-item {
-            background: #f2f6fc;
+       .poll-results-item {
+             background: #f2f6fc;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             transition: background 0.3s ease;
-            text-align: center;
-             position: relative; /* Needed for absolute positioning of share button */
-            display: flex;
-            justify-content: center;
-            align-content: center;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
         }
-
-        .poll-item a {
-            font-size: 1.2rem;
-            color: #1E90FF;
-            text-decoration: none;
-            display: block;
-            transition: color 0.3s ease;
-
+        .poll-results-item span{
+            font-size: 1rem;
+             font-weight: bold;
         }
-
-        .poll-item a:hover {
-            color: #00BFFF;
-        }
-         .share-button {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: #1E90FF;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
+         .poll-results-item p{
             font-size: 0.9rem;
-            transition: background 0.3s ease;
-            border: none;
-             text-decoration: none;
-             margin-bottom: 5px;
-
-        }
-        .share-button:hover {
-            background: #00BFFF;
-        }
-         .share-button:active {
-            transform: scale(0.95);
-         }
-
-        .new-poll{
-            color:white;
-            text-decoration: none;
-            padding: 15px;
-            background-color: #1E90FF;
-            border-radius: 25px;
-            transition: 0.3s;
-            margin-top: 15px;
-        }
-        .new-poll:hover{
-            background-color: #0a63b4;
-        }
-        .results-button {
-            color:white;
-            text-decoration: none;
-            padding: 15px;
-            background-color: #1E90FF;
-            border-radius: 25px;
-            transition: 0.3s;
-            margin-top: 15px;
-             display: inline-block;
-        }
-        .results-button:hover{
-            background-color: #0a63b4;
         }
         /* Responsive styles */
         @media (max-width: 768px) {
@@ -215,24 +157,21 @@
                 font-size: 0.9rem;
                 padding: 8px 16px;
             }
-
-            .poll-item {
+         .poll-results-item {
                 padding: 12px;
             }
-             .share-button {
-                padding: 6px 10px;
-                font-size: 0.8rem;
-            }
+             .poll-results-item span{
+            font-size: 0.9rem;
+        }
+        .poll-results-item p{
+            font-size: 0.8rem;
+        }
         }
     </style>
 </head>
 <body>
-
-    <header>
+      <header>
         <div class="logo">Pollcraft Dashboard</div>
-        <div class="header-btns">
-        <a class="dropdown-button" href="/user_results">Your Answers</a>
-
         <div class="dropdown">
             <div class="dropdown-button">{{ session.username }}</div>
             <div class="dropdown-content">
@@ -241,36 +180,23 @@
                 <a href="/logout">Log out</a>
             </div>
         </div>
-            </div>
     </header>
 
     <div class="content-wrapper">
         <div class="content">
-            <h2>Your Polls</h2>
-            <ul class="poll-list">
-                {% for poll in polls %}
-                <li class="poll-item">
-                    <a class="poll-title" href="/poll/{{ poll.id }}"> {{ poll.title }} </a>
-                    <button class="share-button" onclick="copyToClipboard('/poll/{{ poll.id }}')">Share</button>
-                </li>
-                {% endfor %}
-            </ul>
+              <h2>Your Poll Results</h2>
+                <ul class="poll-results">
+                 {% for result in results %}
+                    <li class="poll-results-item">
+                        <span>{{ result.title }}</span>
+                        <p>Correct Answers: {{ result.correct_count }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
         </div>
-        <a class="new-poll" href="/create_poll">+ New Poll</a>
+
     </div>
 
-     <script>
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(window.location.origin + text)
-            .then(() => {
-                alert("Poll link copied to clipboard!");
-            })
-            .catch(err => {
-                console.error('Failed to copy text: ', err);
-                alert("Failed to copy link, please try again!");
-            });
-        }
-    </script>
 
 </body>
 </html>

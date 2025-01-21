@@ -171,19 +171,48 @@ def poll(poll_id):
 
     if request.method == 'POST':
         if not is_creator and not has_voted:
-            selected_option_ids = request.form.getlist('options[]')
-            if selected_option_ids:
+            selected_option_ids = request.form.getlist('options')
+
+            # Group options based on headings
+            grouped_options = []
+            current_group = []
+            for option in poll.options:
+                if option.text.startswith('<h1>'):
+                    if current_group:
+                        grouped_options.append(current_group)
+                    current_group = [option]
+                else:
+                    current_group.append(option)
+            if current_group:
+                grouped_options.append(current_group)
+
+            total_correct = 0
+            for group in grouped_options:
+                section_correct = True
+                if group[0].text.startswith('<h1>'):
+                    for option in group[1:]:
+                        if str(option.id) in selected_option_ids and not option.correct:
+                            section_correct = False
+                    if section_correct:
+                        for option in group[1:]:
+                            if str(option.id) in selected_option_ids and option.correct:
+                                total_correct += 1
+
+            for group in grouped_options:
+                if not group[0].text.startswith('<h1>'):
+                    for option in group:
+                        if str(option.id) in selected_option_ids and option.correct:
+                            total_correct += 1
+            if len(selected_option_ids) > 0:
                 for selected_option_id in selected_option_ids:
                     option = Option.query.get(selected_option_id)
                     if option:
                         option.votes += 1
-                        is_correct = option.correct
-
                         new_vote = Vote(user_id=user.id, poll_id=poll.id, option_id=selected_option_id,
-                                        is_correct=is_correct)
+                                        is_correct=option.correct)
                         db.session.add(new_vote)
-                db.session.commit()
 
+            db.session.commit()
         return redirect(url_for('poll', poll_id=poll_id))
     print(f"Debugging: Options for poll {poll.id}: {[option.text for option in poll.options]}")
     return render_template('poll.html', poll=poll, is_creator=is_creator, has_voted=has_voted)
@@ -258,6 +287,34 @@ def poll_results(poll_id):
     ]
 
     return render_template('results.html', poll=poll, grouped_votes=grouped_votes)
+
+
+@app.route('/user_results')
+def user_results():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    user = User.query.filter_by(username=session['username']).first()
+    if not user:
+        return "User not found"
+
+    # Get all votes by the current user
+    votes = Vote.query.filter_by(user_id=user.id).all()
+
+    # Group votes by poll and count the total correct answers
+    poll_results = {}
+    for vote in votes:
+        poll = Poll.query.get(vote.poll_id)
+        if poll:
+            if poll.id not in poll_results:
+                poll_results[poll.id] = {'title': poll.title, 'correct_count': 0}
+            if vote.is_correct:
+                poll_results[poll.id]['correct_count'] += 1
+
+    # Convert poll results to a list
+    results_list = list(poll_results.values())
+
+    return render_template('user_results.html', results=results_list)
 
 
 if __name__ == '__main__':
