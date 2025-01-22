@@ -193,6 +193,7 @@ def poll(poll_id):
                     for option in group[1:]:
                         if str(option.id) in selected_option_ids and not option.correct:
                             section_correct = False
+                            break
                     if section_correct:
                         for option in group[1:]:
                             if str(option.id) in selected_option_ids and option.correct:
@@ -216,7 +217,6 @@ def poll(poll_id):
         return redirect(url_for('poll', poll_id=poll_id))
     print(f"Debugging: Options for poll {poll.id}: {[option.text for option in poll.options]}")
     return render_template('poll.html', poll=poll, is_creator=is_creator, has_voted=has_voted)
-
 
 @app.route('/delete/<poll_id>', methods=['GET'])
 def delete_poll(poll_id):
@@ -266,20 +266,66 @@ def poll_results(poll_id):
     # Get all votes for the poll
     votes = Vote.query.filter_by(poll_id=poll.id).all()
 
-    # Group votes by username and calculate correct answers
-    vote_details = {}
+    # Group votes by user
+    user_votes = {}
     for vote in votes:
-        user = User.query.get(vote.user_id)
-        option = Option.query.get(vote.option_id)
+        if vote.user_id not in user_votes:
+           user_votes[vote.user_id] = []
+        user_votes[vote.user_id].append(vote)
 
-        if user.username not in vote_details:
-            vote_details[user.username] = {'options': [], 'correct_count': 0}
+    # Calculate correct counts for each user, considering section logic
+    vote_details = {}
+    for user_id, votes_list in user_votes.items():
+        user = User.query.get(user_id)
+        if not user:
+            continue
 
-        vote_details[user.username]['options'].append(option.text)
+        correct_count = 0
 
-        if vote.is_correct:
-            vote_details[user.username]['correct_count'] += 1
+        # Create the same grouped options
+        grouped_options = []
+        current_group = []
+        for option in poll.options:
+            if option.text.startswith('<h1>'):
+                if current_group:
+                    grouped_options.append(current_group)
+                current_group = [option]
+            else:
+                current_group.append(option)
+        if current_group:
+            grouped_options.append(current_group)
 
+
+        # Function to check if an option was selected in the user's votes for a specific poll
+        def is_option_selected(option_id, vote_list):
+            for vote in vote_list:
+                if vote.option_id == option_id:
+                   return True
+            return False
+        total_correct = 0
+        # Calculate score based on grouped options logic
+        for group in grouped_options:
+            section_correct = True
+            if group[0].text.startswith('<h1>'):
+                for option in group[1:]:
+                    if is_option_selected(option.id, votes_list) and not option.correct:
+                        section_correct = False
+                        break
+                if section_correct:
+                   for option in group[1:]:
+                       if is_option_selected(option.id, votes_list) and option.correct:
+                            total_correct += 1
+
+        for group in grouped_options:
+            if not group[0].text.startswith('<h1>'):
+                for option in group:
+                    if is_option_selected(option.id, votes_list) and option.correct:
+                        correct_count += 1
+
+        vote_details[user.username] = {
+            'options': [Option.query.get(vote.option_id).text for vote in votes_list],
+            'correct_count': correct_count+ total_correct
+        }
     # Convert the vote_details dictionary into a list of dictionaries for easier rendering
     grouped_votes = [
         {'username': username, 'options': details['options'], 'correct_count': details['correct_count']}
@@ -301,19 +347,66 @@ def user_results():
     # Get all votes by the current user
     votes = Vote.query.filter_by(user_id=user.id).all()
 
-    # Group votes by poll and count the total correct answers
-    poll_results = {}
+    # Group votes by poll
+    poll_votes = {}
     for vote in votes:
-        poll = Poll.query.get(vote.poll_id)
-        if poll:
-            if poll.id not in poll_results:
-                poll_results[poll.id] = {'title': poll.title, 'correct_count': 0}
-            if vote.is_correct:
-                poll_results[poll.id]['correct_count'] += 1
+        if vote.poll_id not in poll_votes:
+            poll_votes[vote.poll_id] = []
+        poll_votes[vote.poll_id].append(vote)
 
-    # Convert poll results to a list
+    # Calculate correct counts for each poll, considering section logic
+    poll_results = {}
+    for poll_id, votes_list in poll_votes.items():
+        poll = Poll.query.get(poll_id)
+        if not poll:
+            continue
+
+        correct_count = 0
+        # Create the same grouped options
+        grouped_options = []
+        current_group = []
+        for option in poll.options:
+            if option.text.startswith('<h1>'):
+                if current_group:
+                    grouped_options.append(current_group)
+                current_group = [option]
+            else:
+                current_group.append(option)
+        if current_group:
+            grouped_options.append(current_group)
+
+        # Function to check if an option was selected in the user's votes for a specific poll
+        def is_option_selected(option_id, vote_list):
+            for vote in vote_list:
+                if vote.option_id == option_id:
+                    return True
+            return False
+        total_correct = 0
+        # Calculate score based on grouped options logic
+        for group in grouped_options:
+            section_correct = True
+            if group[0].text.startswith('<h1>'):
+                for option in group[1:]:
+                    if is_option_selected(option.id, votes_list) and not option.correct:
+                        section_correct = False
+                        break
+                if section_correct:
+                    for option in group[1:]:
+                        if is_option_selected(option.id, votes_list) and option.correct:
+                            total_correct += 1
+
+        for group in grouped_options:
+            if not group[0].text.startswith('<h1>'):
+                for option in group:
+                    if is_option_selected(option.id, votes_list) and option.correct:
+                        correct_count += 1
+
+        poll_results[poll_id] = {
+            'title': poll.title,
+            'correct_count': correct_count + total_correct
+        }
+
     results_list = list(poll_results.values())
-
     return render_template('user_results.html', results=results_list)
 
 
