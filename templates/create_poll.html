@@ -1,317 +1,406 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Poll</title>
-    <style>
-        /* Resetting default styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Poll</title>
+  <style>
+    /* Resetting default styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    button{
+        cursor:pointer;
+    }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #f7f7f7;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            padding-top: 60px; /* Space for the header */
-        }
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f7f7f7;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding-top: 60px; /* Space for the header */
+    }
+    .whitelist-container{
+        display: flex;
+        justify-content: center;
+    }
+    /* Header Styling */
+    header {
+      width: 100%;
+      background-color: #1E90FF;
+      padding: 15px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.5rem;
+      color: white;
+      text-transform: uppercase;
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+      margin-right: 20px;
+    }
 
-        /* Header Styling */
-        header {
-            width: 100%;
-            background-color: #1E90FF;
-            padding: 15px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.5rem;
-            color: white;
-            text-transform: uppercase;
-        }
-        .dropdown {
-            position: relative;
-            display: inline-block;
-            margin-right: 20px;
-        }
+    .dropdown-button {
+      cursor: pointer;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 30px;
+      transition: background 0.3s ease, transform 0.3s ease;
+      text-decoration: none;
+      color: #fff;
+    }
 
-        .dropdown-button {
-            cursor: pointer;
-            padding: 10px 20px;
-            font-size: 1rem;
-            border-radius: 30px;
-             transition: background 0.3s ease, transform 0.3s ease;
-             text-decoration: none;
-            color: #fff;
-        }
+    .dropdown-button:hover {
+      background: #00BFFF;
+      transform: translateY(-5px);
+    }
 
-         .dropdown-button:hover {
-            background: #00BFFF;
-            transform: translateY(-5px);
-        }
+    .dropdown-button:active {
+      transform: translateY(2px);
+    }
 
-        .dropdown-button:active {
-            transform: translateY(2px);
-        }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f9f9f9;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      right: 0; /* Align dropdown to the right */
+      border-radius: 8px;
+    }
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            right: 0; /* Align dropdown to the right */
-            border-radius: 8px;
+    .dropdown-content a {
+      font-size: 15px;
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
 
-        }
+    .dropdown-content a:hover {
+      background-color: #f1f1f1;
+      border-radius: 10px;
+    }
 
-        .dropdown-content a {
-            font-size: 15px;
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
 
-        .dropdown-content a:hover {background-color: #f1f1f1;border-radius: 10px}
+    /* Main content container */
+    .content-wrapper {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      height: 100%;
+      padding-top: 100px; /* Adjust for header height */
+    }
 
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
+    .content {
+      width: 100%;
+      max-width: 600px;
+      padding: 30px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center; /* Centering the content */
+    }
 
-        /* Main content container */
-        .content-wrapper {
-            display: flex;
-            align-items: center;
-            flex-direction: column;
-            height: 100%;
-            padding-top: 100px; /* Adjust for header height */
-        }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #333;
+    }
 
-        .content {
-            width: 100%;
-            max-width: 600px;
-            padding: 30px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center; /* Centering the content */
-        }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
 
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #333;
-        }
+    input[type="checkbox"] {
+      margin-right: 5px;
+    }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 1rem;
-        }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #1E90FF;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #1E90FF;
-            color: white;
-            font-size: 1rem;
-            border: none;
-            border-radius: 5px;
-            margin-top: 10px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
+    button:hover {
+      background-color: #006905;
+    }
 
-        button:hover {
-            background-color: #006905;
-        }
+    button:active {
+      transform: translateY(2px);
+    }
 
-        button:active {
-            transform: translateY(2px);
-        }
+    #options {
+      width: 100%;
+      margin-bottom: 20px;
+    }
 
-        #options {
-            width: 100%;
-            margin-bottom: 20px;
-        }
+    .option-input {
+      margin-bottom: 10px;
+    }
 
-        .option-input {
-            margin-bottom: 10px;
-        }
+    .heading-input-container {
+      margin-bottom: 10px;
+    }
 
-       .heading-input-container {
-           margin-bottom: 10px;
-        }
+    .heading-input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      display: none;
+    }
 
-        .heading-input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 1rem;
-            display: none;
-         }
-        .control{
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-bottom: 5px;
-        }
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            body {
-                padding-top: 80px; /* Adjust padding for smaller screens */
-            }
+    .control {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
 
-            h1 {
-                font-size: 1.6rem;
-            }
-            .dropdown-button {
-                font-size: 0.9rem;
-                padding: 8px 16px;
-            }
-            input[type="text"], button {
-                font-size: 0.9rem;
-            }
+    /* Container for allowed usernames (private quiz) */
+    #allowedUserContainer {
+      display: none;
+      margin: 10px 0;
+      text-align: left;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      background-color: #fafafa;
+    }
+    .allowed-user {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .allowed-user input[type="text"] {
+      flex: 1;
+      margin-right: 5px;
+      min-width: 150px;  /* Asigură că input-ul are o lățime minimă */
+    }
+    /* Stilizare pentru butonul Remove */
+    .allowed-user button {
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 3px;
+      background-color: #ea2f2f;
+      color: #fff;
+      cursor: pointer;
+      flex-shrink: 0;
+        width: 25%;
+    }
 
-            .content {
-                padding: 20px;
-            }
-        }
-    </style>
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      body {
+        padding-top: 80px; /* Adjust padding for smaller screens */
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+      .dropdown-button {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+      }
+      input[type="text"],
+      button {
+        font-size: 0.9rem;
+      }
+
+      .content {
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-    <header>
-        <div class="logo">Create a new Poll</div>
-        <div class="dropdown">
-            <div class="dropdown-button">{{ session.username }}</div>
-            <div class="dropdown-content">
-                 <a href="/dashboard">View Polls</a>
-                <a href="/create_poll">Create Poll</a>
-                <a href="/logout">Log out</a>
-            </div>
-        </div>
-    </header>
-
-    <div class="content-wrapper">
-        <div class="content">
-            <form method="POST" autocomplete="off">
-                <input style="text-align: center; font-size: 25px;" type="text" name="title" placeholder="Poll Title" required><br>
-                <div id="options">
-
-                </div>
-                <div class="control">
-                    <button class="q-btn" style="background-color: #ea2f2f; cursor:pointer; width: 30%;" type="button" onclick="addHeading()">Add Question</button><br>
-                    <button class="a-btn" style="background-color: #38a838; cursor:pointer; width: 30%;" type="button" onclick="addOption()">Add Answer</button><br>
-                </div>
-                    <button style="cursor:pointer; width: 90%;" type="submit";>Create this poll and get the link</button>
-            </form>
-        </div>
+  <header>
+    <div class="logo">Create a new Poll</div>
+    <div class="dropdown">
+      <div class="dropdown-button">{{ session.username }}</div>
+      <div class="dropdown-content">
+        <a href="/dashboard">View Polls</a>
+        <a href="/create_poll">Create Poll</a>
+        <a href="/logout">Log out</a>
+      </div>
     </div>
+  </header>
 
-    <script>
-            function addOption() {
-            const optionsDiv = document.getElementById('options');
+  <div class="content-wrapper">
+    <div class="content">
+      <form id="pollForm" method="POST" autocomplete="off">
+        <input style="text-align: center; font-size: 25px;" type="text" name="title" placeholder="Poll Title" required /><br>
+        <div id="options"></div>
 
-            const optionContainer = document.createElement('div');
-            optionContainer.style.display = 'flex';
-            optionContainer.style.alignItems = 'center';
-            optionContainer.style.marginBottom = '10px';
+        <div class="control">
+          <button class="q-btn" style="background-color: #ea2f2f; cursor:pointer; width: 30%;" type="button" onclick="addHeading()">Add Question</button>
+          <button class="a-btn" style="background-color: #38a838; cursor:pointer; width: 30%;" type="button" onclick="addOption()">Add Answer</button>
+        </div>
 
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = 'options';
-            input.classList.add('option-input');
-            input.placeholder = 'Answer';
+        <button style="cursor:pointer; width: 90%;" type="submit">Create</button><br><br>
 
-            const correctCheckbox = document.createElement('input');
-            correctCheckbox.type = 'checkbox';
-            correctCheckbox.name = 'correct_options[]';
-            correctCheckbox.style.marginLeft = '10px';
-            correctCheckbox.value = optionsDiv.children.length; // Folosește indexul opțiunii
+          <!-- Checkbox pentru quiz privat -->
+        <div style="text-align: left; margin: 10px 0;" class="whitelist-container">
+          <input type="checkbox" id="privateQuiz" name="private" onchange="toggleAllowedUsers()" />
+          <label for="privateQuiz">Whitelist usernames</label>
+        </div>
 
-            // Așează checkbox-ul în div-ul corespunzător
-            optionsDiv.appendChild(correctCheckbox);
+        <!-- Container pentru adăugarea numelor de utilizator permise -->
+        <div id="allowedUserContainer">
+          <h3>Allowed Usernames</h3>
+          <div id="allowedUsers"></div>
+          <button type="button" style="width: 100%; background-color: #1E90FF;" onclick="addAllowedUser()">Add Allowed User</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-            // Adaugă un event listener pentru a verifica dacă checkbox-ul este selectat
-            correctCheckbox.addEventListener('change', function() {
-                if (correctCheckbox.checked) {
-                    input.style.outline = '2px solid green'; // Adaugă outline verde când este selectat
-                } else {
-                    input.style.outline = ''; // Resetează outline când este deselectat
-                }
-            });
+  <script>
+    function addOption() {
+      const optionsDiv = document.getElementById("options");
 
+      const optionContainer = document.createElement("div");
+      optionContainer.style.display = "flex";
+      optionContainer.style.alignItems = "center";
+      optionContainer.style.marginBottom = "10px";
 
-            optionContainer.appendChild(input);
-            optionContainer.appendChild(correctCheckbox);
-            optionsDiv.appendChild(optionContainer);
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "options";
+      input.classList.add("option-input");
+      input.placeholder = "Answer";
+
+      const correctCheckbox = document.createElement("input");
+      correctCheckbox.type = "checkbox";
+      correctCheckbox.name = "correct_options[]";
+      correctCheckbox.style.marginLeft = "10px";
+      correctCheckbox.value = optionsDiv.children.length; // folosește indexul opțiunii
+
+      // Așează checkbox-ul în div-ul corespunzător
+      optionsDiv.appendChild(correctCheckbox);
+
+      // Adaugă event listener pentru a schimba outline-ul input-ului când checkbox-ul este selectat
+      correctCheckbox.addEventListener("change", function () {
+        if (correctCheckbox.checked) {
+          input.style.outline = "2px solid green";
+        } else {
+          input.style.outline = "";
         }
+      });
 
+      optionContainer.appendChild(input);
+      optionContainer.appendChild(correctCheckbox);
+      optionsDiv.appendChild(optionContainer);
+    }
 
-         function addHeading() {
-                const optionsDiv = document.getElementById('options');
+    function addHeading() {
+      const optionsDiv = document.getElementById("options");
 
-                // Create the container div for heading input
-                const headingContainer = document.createElement('div');
-                headingContainer.classList.add('heading-input-container');
+      // Create container div for heading input
+      const headingContainer = document.createElement("div");
+      headingContainer.classList.add("heading-input-container");
 
-                // Create input element for the heading (text input)
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.classList.add('heading-input');
-                input.placeholder = 'Question';
+      // Create input element for the heading (text input)
+      const input = document.createElement("input");
+      input.type = "text";
+      input.classList.add("heading-input");
+      input.placeholder = "Question";
 
-                // Create hidden input (hidden) for sending html
-                 const hiddenInput = document.createElement('input');
-                 hiddenInput.type = 'hidden';
-                 hiddenInput.name = 'options';
+      // Create hidden input for sending HTML
+      const hiddenInput = document.createElement("input");
+      hiddenInput.type = "hidden";
+      hiddenInput.name = "options";
 
+      headingContainer.appendChild(input);
+      headingContainer.appendChild(hiddenInput);
 
-                headingContainer.appendChild(input);
-                headingContainer.appendChild(hiddenInput);
-
-                // Add event listener for when the input element loses focus to create the h1 tag and hidden input
-                input.addEventListener('blur', function() {
-                   if (this.value) {
-                        const headingText = this.value;
-
-                         const headingElement = document.createElement('h1');
-                         headingElement.textContent = headingText;
-
-                         hiddenInput.value = '<h1>' + headingText + '</h1>';
-
-                         // Replace text input with h1 tag
-                         headingContainer.replaceChild(headingElement, input);
-
-                    }else
-                    {
-                        headingContainer.remove();
-                    }
-
-                });
-
-                optionsDiv.appendChild(headingContainer);
-                input.style.display = "block";
-                input.focus();
+      // Când input-ul pierde focus, înlocuiește-l cu un element h1 sau elimină containerul dacă nu s-a scris nimic
+      input.addEventListener("blur", function () {
+        if (this.value) {
+          const headingText = this.value;
+          const headingElement = document.createElement("h1");
+          headingElement.textContent = headingText;
+          hiddenInput.value = "<h1>" + headingText + "</h1>";
+          // Înlocuiește text input cu h1 tag
+          headingContainer.replaceChild(headingElement, input);
+        } else {
+          headingContainer.remove();
         }
-    </script>
+      });
 
+      optionsDiv.appendChild(headingContainer);
+      input.style.display = "block";
+      input.focus();
+    }
+
+    // Toggle containerul pentru allowed users în funcţie de checkbox-ul "private"
+    function toggleAllowedUsers() {
+      const privateCheckbox = document.getElementById("privateQuiz");
+      const container = document.getElementById("allowedUserContainer");
+      container.style.display = privateCheckbox.checked ? "block" : "none";
+    }
+
+    // Adaugă un input pentru un username permis
+    function addAllowedUser() {
+      const container = document.getElementById("allowedUsers");
+
+      const div = document.createElement("div");
+      div.classList.add("allowed-user");
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "allowed_users";
+      input.placeholder = "Username";
+
+      // Buton pentru a elimina acest câmp, dacă se dorește
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.textContent = "Remove";
+      removeBtn.onclick = () => {
+        div.remove();
+      };
+
+      div.appendChild(input);
+      div.appendChild(removeBtn);
+      container.appendChild(div);
+    }
+
+    // Adăugăm un event listener la formular pentru a forța pierderea focus-ului
+    // la ultimul input "allowed_users" înainte de submit.
+    document.getElementById("pollForm").addEventListener("submit", function() {
+      if (document.activeElement && document.activeElement.name === "allowed_users") {
+        document.activeElement.blur();
+      }
+    });
+  </script>
 </body>
 </html>
