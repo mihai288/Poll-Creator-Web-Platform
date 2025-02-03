@@ -149,8 +149,8 @@
 
         }
 
-        .poll-item a:hover {
-            color: #00BFFF;
+        .poll-item a{
+            width: 15rem;
         }
          .share-button {
             position: absolute;
@@ -158,7 +158,7 @@
             right: 10px;
             background: #1E90FF;
             color: white;
-            padding: 8px 12px;
+            padding: 8px 6px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 0.9rem;
@@ -185,7 +185,7 @@
             margin-top: 15px;
         }
         .new-poll:hover{
-            background-color: #5cc6ff;
+            background-color: #2453be;
         }
         .results-button {
             color:white;
@@ -199,6 +199,9 @@
         }
         .results-button:hover{
             background-color: #0a63b4;
+        }
+        .poll-title:hover{
+            text-decoration: underline;
         }
         /* Responsive styles */
         @media (max-width: 768px) {
@@ -229,9 +232,9 @@
 <body>
 
     <header>
-        <div class="logo">Pollcraft Dashboard</div>
+        <div class="logo">QuizOnline</div>
         <div class="header-btns">
-        <a class="dropdown-button" href="/user_results">Your Answers</a>
+        <a class="dropdown-button" href="/user_results">Answers</a>
 
         <div class="dropdown">
             <div class="dropdown-button">{{ session.username }}</div>
@@ -246,28 +249,37 @@
 
     <div class="content-wrapper">
         <div class="content">
-            <h2>Your Polls</h2>
+            <h2 style="border-bottom: 2px solid #185aff; padding: 15px; margin-bottom: 28px;">Dashboard</h2>
+            <a class="new-poll" href="/create_poll">+ New</a>
             <ul class="poll-list">
-                {% for poll in polls %}
-                <li class="poll-item">
-                    <a class="poll-title" href="/poll/{{ poll.id }}"> {{ poll.title }} </a>
-                    <button class="share-button" onclick="copyToClipboard('/poll/{{ poll.id }}')">Share</button>
-                </li>
+                {% for poll in polls | reverse %}
+                {% if poll.is_active %}
+                    <li style="border: 2px solid blue;" class="poll-item">
+                        <a class="poll-title" href="/poll/{{ poll.id }}"> {{ poll.title }} </a>
+                        <button class="share-button" onclick="copyToClipboard('/poll/{{ poll.id }}')">Copy Link</button>
+                    </li>
+                {% else %}
+                    <li style="border: 2px solid red;" class="poll-item">
+                        <a class="poll-title" href="/poll/{{ poll.id }}"> {{ poll.title }} </a>
+                    </li>
+                {% endif %}
                 {% endfor %}
             </ul>
         </div>
-        <a class="new-poll" href="/create_poll">+ New Poll</a>
+        {% if not polls %}
+            <span>You have not created any polls. <a style="text-decoration: none; color:#1E90FF;" href="/create_poll">Get started creating a poll!</a></span><br>
+        {% endif %}
     </div>
 
      <script>
         function copyToClipboard(text) {
             navigator.clipboard.writeText(window.location.origin + text)
             .then(() => {
-                alert("Poll link copied to clipboard!");
+
             })
             .catch(err => {
                 console.error('Failed to copy text: ', err);
-                alert("Failed to copy link, please try again!");
+
             });
         }
     </script>

@@ -11,7 +11,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///polls.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Modele
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -23,7 +23,8 @@ class Poll(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    is_private = db.Column(db.Boolean, default=False)  # Nou: indică dacă sondajul este privat
+    is_private = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
     options = db.relationship('Option', backref='poll', lazy=True)
     access = db.relationship('PollAccess', backref='poll', lazy=True)
 
@@ -51,7 +52,7 @@ class Vote(db.Model):
     option = db.relationship('Option', backref=db.backref('option_votes', lazy=True))
 
 with app.app_context():
-    #db.drop_all()  # Dezactivează pentru a nu pierde datele
+    #db.drop_all()
     db.create_all()
 
 @app.route('/')
@@ -121,9 +122,9 @@ def create_poll():
     if request.method == 'POST':
         title = request.form['title']
         options = request.form.getlist('options')
-        correct_options = request.form.getlist('correct_options[]')  # Indicii opțiunilor corecte
+        correct_options = request.form.getlist('correct_options[]')
 
-        # Verificăm dacă sondajul este privat
+
         private_flag = request.form.get('private')
         is_private = True if private_flag == 'on' else False
 
@@ -132,7 +133,7 @@ def create_poll():
         new_poll = Poll(id=poll_id, title=title, creator=user, is_private=is_private)
         db.session.add(new_poll)
 
-        # Adăugăm opțiunile sondajului
+
         for i, option_text in enumerate(options):
             is_correct = str(i) in correct_options
             option = Option(text=option_text, poll=new_poll, correct=is_correct)
@@ -140,12 +141,12 @@ def create_poll():
 
         db.session.commit()
 
-        # Dacă sondajul este privat, preluăm lista de utilizatori permisi
+
         if is_private:
             allowed_usernames = request.form.getlist("allowed_users")
             for username in allowed_usernames:
                 username = username.strip()
-                if username:  # ignorăm câmpurile goale
+                if username:
                     allowed_user = User.query.filter_by(username=username).first()
                     if allowed_user:
                         access = PollAccess(poll_id=new_poll.id, user_id=allowed_user.id)
@@ -167,7 +168,7 @@ def poll(poll_id):
 
     user = User.query.filter_by(username=session['username']).first()
 
-    # Verificăm dacă utilizatorul are acces la sondaj dacă acesta este privat
+
     if poll.is_private and poll.creator_id != user.id:
         allowed_ids = [access.user_id for access in poll.access]
         if user.id not in allowed_ids:
@@ -178,39 +179,11 @@ def poll(poll_id):
     has_voted = existing_vote is not None
 
     if request.method == 'POST':
+        if not poll.is_active:
+            return "This poll is closed for answers."
+
         if not is_creator and not has_voted:
             selected_option_ids = request.form.getlist('options')
-            # Gruparea opțiunilor după secțiuni (dacă există headings)
-            grouped_options = []
-            current_group = []
-            for option in poll.options:
-                if option.text.startswith('<h1>'):
-                    if current_group:
-                        grouped_options.append(current_group)
-                    current_group = [option]
-                else:
-                    current_group.append(option)
-            if current_group:
-                grouped_options.append(current_group)
-
-            total_correct = 0
-            for group in grouped_options:
-                section_correct = True
-                if group[0].text.startswith('<h1>'):
-                    for option in group[1:]:
-                        if str(option.id) in selected_option_ids and not option.correct:
-                            section_correct = False
-                            break
-                    if section_correct:
-                        for option in group[1:]:
-                            if str(option.id) in selected_option_ids and option.correct:
-                                total_correct += 1
-
-            for group in grouped_options:
-                if not group[0].text.startswith('<h1>'):
-                    for option in group:
-                        if str(option.id) in selected_option_ids and option.correct:
-                            total_correct += 1
             if len(selected_option_ids) > 0:
                 for selected_option_id in selected_option_ids:
                     option = Option.query.get(selected_option_id)
@@ -241,11 +214,27 @@ def delete_poll(poll_id):
 
     Vote.query.filter_by(poll_id=poll_id).delete()
     Option.query.filter_by(poll_id=poll_id).delete()
-    PollAccess.query.filter_by(poll_id=poll_id).delete()  # Ștergem accesul pentru sondajul privat
+    PollAccess.query.filter_by(poll_id=poll_id).delete()
     db.session.delete(poll)
     db.session.commit()
 
     return redirect(url_for('dashboard'))
+
+@app.route('/poll/<poll_id>/stop_answers', methods=['GET'])
+def stop_answers(poll_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    user = User.query.filter_by(username=session['username']).first()
+    poll = Poll.query.get(poll_id)
+    if not poll:
+        return "Poll not found!"
+    if poll.creator_id != user.id:
+        return "You are not the creator of this poll!"
+
+    poll.is_active = False
+    db.session.commit()
+    return redirect(url_for('poll', poll_id=poll_id))
 
 @app.route('/poll/<poll_id>/results')
 def poll_results(poll_id):
@@ -274,6 +263,7 @@ def poll_results(poll_id):
             continue
 
         correct_count = 0
+
         grouped_options = []
         current_group = []
         for option in poll.options:

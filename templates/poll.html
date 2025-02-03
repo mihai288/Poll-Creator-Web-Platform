@@ -19,7 +19,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            padding-top: 60px; /* Space for the header */
+            padding-top: 60px; /* Spațiu pentru header */
         }
 
         /* Header Styling */
@@ -65,7 +65,7 @@
             align-items: center;
             flex-direction: column;
             height: 100%;
-            padding-top: 100px; /* Adjust for header height */
+            padding-top: 100px; /* Ajustare pentru înălțimea header-ului */
         }
 
         .content {
@@ -75,7 +75,7 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center; /* Centering the content */
+            text-align: center;
         }
 
         h1 {
@@ -133,14 +133,16 @@
         /* Responsive styles */
         @media (max-width: 768px) {
             body {
-                padding-top: 80px; /* Adjust padding for smaller screens */
+                padding-top: 80px;
             }
-
+            .content{
+                width: 90%;
+            }
             h1 {
                 font-size: 1.6rem;
             }
 
-            input[type="radio"], button {
+            input[type="checkbox"], button {
                 font-size: 0.9rem;
             }
 
@@ -165,31 +167,41 @@
                     <p>Please <a href="{{ url_for('login') }}">log in</a> to vote.</p>
                 {% else %}
                     {% if has_voted %}
-            <p>You have succesfully voted for this poll! You can get the results on <a href="/user_results">Your Answers</a> page!</p>
+                        <p>You have successfully voted for this poll! You can get the results on <a href="/user_results">Your Answers</a> page!</p>
                     {% else %}
-                        <form method="POST">
-                             {% for option in poll.options %}
-                                {% if (option.text|safe)[:4] == '<h1>' %}
-                                    {{ option.text|safe }}
-                                {% else %}
-                                    <div class="poll-option">
-                                          <input type="checkbox" id="option_{{ option.id }}" name="options" value="{{ option.id }}">
-                                         <label for="option_{{ option.id }}">{{ option.text }}</label>
-                                    </div>
-                                {% endif %}
-                             {% endfor %}
-                            <button type="submit">Vote</button>
-                        </form>
-
+                        {% if not poll.is_active %}
+                            <p>This poll is closed for answers.</p>
+                        {% else %}
+                            <form method="POST">
+                                {% for option in poll.options %}
+                                    {% if (option.text|safe)[:4] == '<h1>' %}
+                                        {{ option.text|safe }}
+                                    {% else %}
+                                        <div class="poll-option">
+                                            <input type="checkbox" id="option_{{ option.id }}" name="options" value="{{ option.id }}">
+                                            <label for="option_{{ option.id }}">{{ option.text }}</label>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <button type="submit">Vote</button>
+                            </form>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             {% endif %}
-        </div><br>
-        {% if is_creator %}
-        <div class="content">
-            <a href="/delete/{{ poll.id }}">Delete</a>
         </div>
-
+        <br>
+        {% if is_creator %}
+            {% if poll.is_active %}
+            <div class="content">
+                <a href="/poll/{{ poll.id }}/stop_answers">Stop Answers</a>
+            </div><br>
+            {% endif %}
+            <div class="content">
+                <a style="color:red;" href="/delete/{{ poll.id }}">Delete</a>
+            </div><br>
+        <br><br>
+        <a href="/dashboard">Back to Home</a>
         {% endif %}
     </div>
 

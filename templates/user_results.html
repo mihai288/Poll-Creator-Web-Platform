@@ -171,7 +171,7 @@
 </head>
 <body>
       <header>
-        <div class="logo">Pollcraft Dashboard</div>
+        <a href="/dashboard" class="logo" style="color:white; text-decoration: none;">QuizOnline</a>
         <div class="dropdown">
             <div class="dropdown-button">{{ session.username }}</div>
             <div class="dropdown-content">
@@ -184,14 +184,18 @@
 
     <div class="content-wrapper">
         <div class="content">
-              <h2>Your Poll Results</h2>
+              <h2>Your Answers</h2>
                 <ul class="poll-results">
                  {% for result in results %}
                     <li class="poll-results-item">
                         <span>{{ result.title }}</span>
+
                         <p>Correct Answers: {{ result.correct_count }}</p>
                     </li>
-                    {% endfor %}
+                {% endfor %}
+                    {% if not results %}
+                        <span style="color:gray;">You have not answered any quiz so far</span>
+                    {% endif %}
                 </ul>
         </div>
 
