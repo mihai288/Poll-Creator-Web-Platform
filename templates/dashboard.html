@@ -203,6 +203,7 @@
         .poll-title:hover{
             text-decoration: underline;
         }
+
         /* Responsive styles */
         @media (max-width: 768px) {
             body {
@@ -270,7 +271,6 @@
             <span>You have not created any polls. <a style="text-decoration: none; color:#1E90FF;" href="/create_poll">Get started creating a poll!</a></span><br>
         {% endif %}
     </div>
-
      <script>
         function copyToClipboard(text) {
             navigator.clipboard.writeText(window.location.origin + text)
