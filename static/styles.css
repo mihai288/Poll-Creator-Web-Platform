@@ -1,3 +1,10 @@
 body,html{
     font-family: Arial;
 }
+footer {
+      background-color: #1E90FF;
+      color: #fff;
+      text-align: center;
+      padding: 20px 10px;
+      font-size: 0.9rem;
+}

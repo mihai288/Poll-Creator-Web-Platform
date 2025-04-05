@@ -38,6 +38,7 @@
             font-size: 1.5rem;
             color: white;
             text-transform: uppercase;
+
         }
 
         header .logo {
@@ -100,14 +101,17 @@
             align-items: center;
             flex-direction: column;
             height: 100%;
-
+            padding-top: 50px;
         }
 
         .content {
             width: 100%;
+            padding: 30px;
             max-width: 1000px;
-            padding: 20px;
             text-align: center; /* Centering the content */
+            background-color: #fafafa;
+            border-radius: 50px;
+            box-shadow: 0 0 15px #d0d0d0;
         }
 
         h2 {
@@ -162,7 +166,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 0.9rem;
-            transition: background 0.3s ease;
+            transition: all 0.1s;
             border: none;
              text-decoration: none;
              margin-bottom: 5px;
@@ -250,7 +254,7 @@
 
     <div class="content-wrapper">
         <div class="content">
-            <h2 style="border-bottom: 2px solid #185aff; padding: 15px; margin-bottom: 28px;">Dashboard</h2>
+            <h2 style="border-bottom: 2px solid #527de8; padding: 15px; margin-bottom: 28px; color: #5885ff;">Dashboard</h2>
             <a class="new-poll" href="/create_poll">+ New</a>
             <ul class="poll-list">
                 {% for poll in polls | reverse %}
